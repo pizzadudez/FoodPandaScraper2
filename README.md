@@ -24,3 +24,4 @@ https://www.foodpanda.ro/restaurant/v5ai/steak
   - add the rest normally
   - go thru all products that have a menu_cat.id and check for combos
     - use .join() in sqlalchemy to get all menu_item_products of a vendor
+- [ ] images retry with different widths

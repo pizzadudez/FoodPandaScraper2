@@ -86,6 +86,7 @@ class Product(Base):
     name = Column('name', String)
     description = Column('description', String)
     price = Column('price', String)
+    has_image = Column('has_image', Boolean, default=False)
     is_combo_menu_item = Column('is_combo_menu_item', Boolean, default=False)
     # code = Column('code', String)
     menu_category_id = Column(Integer, ForeignKey('scrapy_menu_categories.id'))

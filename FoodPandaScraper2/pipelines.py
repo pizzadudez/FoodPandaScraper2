@@ -123,6 +123,7 @@ class PostgresPipeline(object):
                     
                     # Append product_id for the image download pipeline
                     if product.get('file_path', None):
+                        p.has_image = True
                         item['images'].append(product['id'])
                     mc.products.append(p)
 
@@ -183,6 +184,7 @@ class CustomImagesPipeline(ImagesPipeline):
 
     def change_filename(self, key, response):
         return "full/%s.jpg" % response.meta['id']
+
 
 class JsonPipeline(object):
     def open_spider(self, spider):

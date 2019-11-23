@@ -1,7 +1,14 @@
 import json
-from bs4 import BeautifulSoup as bs
 import scrapy
+
+from bs4 import BeautifulSoup as bs
 from scrapy.http import Request
+from sqlalchemy.orm import sessionmaker, query
+
+from FoodPandaScraper2.models import db_connect, create_tables, Vendor
+
+engine = db_connect()
+create_tables(engine)
 
 
 class FoodSpider(scrapy.Spider):
@@ -25,6 +32,7 @@ class FoodSpider(scrapy.Spider):
         # 'https://www.foodpanda.ro/restaurant/v4pl/bonita',
         # 'https://www.foodpanda.ro/restaurant/v7qc/pizza-napoli-cuptor-cu-lemne',
     ]
+    session = sessionmaker(bind=engine)
 
     def start_requests(self):
         if self.dev:
@@ -45,6 +53,8 @@ class FoodSpider(scrapy.Spider):
             yield Request(url=url, callback=self.vendor_crawl, meta=meta)
 
     def vendor_crawl(self, response):
+        session = self.session()
+
         soup = bs(response.text, 'html.parser')
         city_name = soup.select_one(
                 '.hero-section-content .hero-section-text strong').text.strip()
@@ -52,9 +62,17 @@ class FoodSpider(scrapy.Spider):
                 'div.restaurants-container ul.vendor-list > li > a')
         urls = [response.meta['start_url'] + x['href'] for x in vendor_nodes]
 
-        for count, url in enumerate(urls):
-            if self.limit and count >= self.limit:
+        count = 0
+        for url in urls:
+            # skip vendor if already scraped
+            vendor = session.query(Vendor).filter_by(url=url).first()
+            if vendor:
+                continue
+            # stop crawling if city limit exists
+            count = count + 1
+            if self.limit and count > self.limit:
                 break
+
             meta = {'city_name': city_name}
             yield Request(url=url, callback=self.parse_vendor, meta=meta)
 

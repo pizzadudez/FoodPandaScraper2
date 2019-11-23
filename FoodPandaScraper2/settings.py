@@ -73,9 +73,12 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 5
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'FoodPandaScraper2.pipelines.JsonPipeline': 100,
-   'FoodPandaScraper2.pipelines.PostgresPipeline': 200,
+   'FoodPandaScraper2.pipelines.PostgresPipeline': 100,
+   'FoodPandaScraper2.pipelines.JsonPipeline': 200,
+   'FoodPandaScraper2.pipelines.CustomImagesPipeline': 300,
 }
+
+IMAGES_STORE = 'FoodPandaScraper2/images'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

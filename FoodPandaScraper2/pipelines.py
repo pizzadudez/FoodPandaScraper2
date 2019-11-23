@@ -7,8 +7,13 @@
 
 import json
 import datetime
+import re
 
+from PIL import Image
+from scrapy.pipelines.images import ImagesPipeline
+from scrapy.http import Request
 from sqlalchemy.orm import sessionmaker, query
+
 from FoodPandaScraper2.models import *
 
 
@@ -20,6 +25,7 @@ class PostgresPipeline(object):
 
     def process_item(self, item, spider):
         session = self.session()
+        item['images'] = []
         
         # City
         city_id = item.get('city_id', None)
@@ -114,6 +120,10 @@ class PostgresPipeline(object):
                     else:
                         mc.products.append(p)
                         continue # Skip this product if it already is set as a menu item
+                    
+                    # Append product_id for the image download pipeline
+                    if product.get('file_path', None):
+                        item['images'].append(product['id'])
                     mc.products.append(p)
 
                     # Variations
@@ -147,14 +157,32 @@ class PostgresPipeline(object):
                 for variation in topping.variations:
                     product = variation.product
                     product.is_combo_menu_item = True
-                    product.code = item['code']
+                    # product.code = item['code']
 
 
         # Finish
         session.commit()
-        # return item
+        return item
         
 
+class CustomImagesPipeline(ImagesPipeline):
+    CONVERTED_ORIGINAL = re.compile('^full/[0-9,a-f]+.jpg$')
+
+    def get_media_requests(self, item, info):
+        url = "https://images.deliveryhero.io/image/fd-ro/Products/"
+        end = '.jpg?width=3000'
+        return [Request(url + str(x) + end, meta={'id': x})
+                for x in item.get('images', [])]
+        
+    def get_images(self, response, request, info):
+        for key, image, buf, in super(CustomImagesPipeline, self).\
+                get_images(response, request, info):
+            if self.CONVERTED_ORIGINAL.match(key):
+                key = self.change_filename(key, response)
+            yield key, image, buf
+
+    def change_filename(self, key, response):
+        return "full/%s.jpg" % response.meta['id']
 
 class JsonPipeline(object):
     def open_spider(self, spider):

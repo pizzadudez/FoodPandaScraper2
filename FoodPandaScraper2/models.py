@@ -17,7 +17,7 @@ Base = declarative_base()
 
 
 class City(Base):
-    __tablename__ = 'cities'
+    __tablename__ = 'scrapy_cities'
     id = Column(Integer, primary_key=True)
     name = Column('name', String)
     # Children
@@ -26,7 +26,7 @@ class City(Base):
 
 
 class Vendor(Base):
-    __tablename__ = 'vendors'
+    __tablename__ = 'scrapy_vendors'
     id = Column(Integer, primary_key=True)
     updated_at = Column('updated_at', DateTime)
     name = Column('name', String)
@@ -35,7 +35,7 @@ class Vendor(Base):
     rating = Column('rating', String)
     address = Column('address', String)
     coordinates = Column('coordinates', String)
-    city_id = Column(Integer, ForeignKey('cities.id'))
+    city_id = Column(Integer, ForeignKey('scrapy_cities.id'))
     # Parent
     city = relationship('City', back_populates='vendors')
     # Children
@@ -45,19 +45,21 @@ class Vendor(Base):
             cascade='save-update, delete')
 
 
-menus_menu_categories = Table('menus_menu_categories', Base.metadata,
-    Column('menu_id', Integer, ForeignKey('menus.id', ondelete='cascade')),
-    Column('menu_category_id', Integer, ForeignKey('menu_categories.id', ondelete='cascade'))
+menus_menu_categories = Table('scrapy_menus_menu_categories', Base.metadata,
+    Column('menu_id', Integer, ForeignKey('scrapy_menus.id',
+            ondelete='cascade')),
+    Column('menu_category_id', Integer, ForeignKey('scrapy_menu_categories.id',
+            ondelete='cascade'))
 )
 
 
 class Menu(Base):
-    __tablename__ = 'menus'
+    __tablename__ = 'scrapy_menus'
     id = Column(Integer, primary_key=True)
     name = Column('name', String)
     opening_time = Column('opening_time', String)
     closing_time = Column('closing_time', String)
-    vendor_id = Column(Integer, ForeignKey('vendors.id'))
+    vendor_id = Column(Integer, ForeignKey('scrapy_vendors.id'))
     # Parent
     vendor = relationship('Vendor', back_populates='menus')
     # Children
@@ -66,7 +68,7 @@ class Menu(Base):
 
 
 class MenuCategory(Base):
-    __tablename__ = 'menu_categories'
+    __tablename__ = 'scrapy_menu_categories'
     id = Column(Integer, primary_key=True)
     name = Column('name', String)
     description = Column('description', String)
@@ -79,14 +81,14 @@ class MenuCategory(Base):
 
 
 class Product(Base):
-    __tablename__ = 'products'
+    __tablename__ = 'scrapy_products'
     id = Column(Integer, primary_key=True)
     name = Column('name', String)
     description = Column('description', String)
     price = Column('price', String)
     is_combo_menu_item = Column('is_combo_menu_item', Boolean, default=False)
-    code = Column('code', String)
-    menu_category_id = Column(Integer, ForeignKey('menu_categories.id'))
+    # code = Column('code', String)
+    menu_category_id = Column(Integer, ForeignKey('scrapy_menu_categories.id'))
     # Parent
     menu_category = relationship('MenuCategory', back_populates='products')
     # Children
@@ -96,18 +98,18 @@ class Product(Base):
             cascade='save-update, delete')
 
 
-variations_toppings = Table('variations_toppings', Base.metadata,
-    Column('variation_id', Integer, ForeignKey('variations.id')),
-    Column('topping_id', Integer, ForeignKey('toppings.id'))
+variations_toppings = Table('scrapy_variations_toppings', Base.metadata,
+    Column('variation_id', Integer, ForeignKey('scrapy_variations.id')),
+    Column('topping_id', Integer, ForeignKey('scrapy_toppings.id'))
 )   
 
 
 class Variation(Base):
-    __tablename__ = 'variations'
+    __tablename__ = 'scrapy_variations'
     id = Column(Integer, primary_key=True)
     name = Column('name', String)
     price = Column('price', String)
-    product_id = Column(Integer, ForeignKey('products.id'))
+    product_id = Column(Integer, ForeignKey('scrapy_products.id'))
     # Parent
     product = relationship('Product', back_populates='variations')
     # Children
@@ -116,12 +118,12 @@ class Variation(Base):
 
 
 class Topping(Base):
-    __tablename__ = 'toppings'
+    __tablename__ = 'scrapy_toppings'
     id = Column(Integer, primary_key=True)
     description = Column('description', String)
     min_quantity = Column('min_quantity', Integer)
     max_quantity = Column('max_quantity', Integer)
-    vendor_id = Column(Integer, ForeignKey('vendors.id'))
+    vendor_id = Column(Integer, ForeignKey('scrapy_vendors.id'))
     # Parents
     vendor = relationship('Vendor', back_populates='toppings')
     variations = relationship('Variation', secondary=variations_toppings,
@@ -132,11 +134,11 @@ class Topping(Base):
 
 
 class Option(Base):
-    __tablename__ = 'options'
+    __tablename__ = 'scrapy_options'
     id = Column(Integer, primary_key=True)
     price = Column('price', String)
-    product_id = Column(Integer, ForeignKey('products.id'))
-    topping_id = Column(Integer, ForeignKey('toppings.id', ondelete='cascade'))
+    product_id = Column(Integer, ForeignKey('scrapy_products.id'))
+    topping_id = Column(Integer, ForeignKey('scrapy_toppings.id', ondelete='cascade'))
     # Parents
     product = relationship('Product', back_populates='options')
     topping = relationship('Topping', back_populates='options')

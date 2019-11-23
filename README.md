@@ -10,11 +10,11 @@ https://www.foodpanda.ro/restaurant/v5ai/steak
 
 ## TODO:
 - [x] add menu model
-- append scrapy to table names 
+- [x] append scrapy to table names 
 - [x] move all products from options to the products table
   - add flag 'is_menu_item'
   - options will only contain prod_id and price
-- images table + pipeline:
+- [x] images table + pipeline:
   - try requests from predefined array of width
   - save locally with product id as name
 - skip vendor if crawled recently

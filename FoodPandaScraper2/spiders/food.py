@@ -8,11 +8,22 @@ class FoodSpider(scrapy.Spider):
     name = 'food'
     allowed_domains = ['foodpanda.ro']
     start_urls = ['https://www.foodpanda.ro']
-    limit = 1 # number of vendors per city allowed
+    limit = 3 # number of vendors per city allowed
     dev = False
     dev_urls = [
-        'https://www.foodpanda.ro/restaurant/v4rj/pizza-transilvania',
-        # 'https://www.foodpanda.ro/restaurant/v4no/pizza-hut-delivery-brasov-nord',
+        # 'https://www.foodpanda.ro/chain/cw9yi/pizza-hut-delivery',
+        # 'https://www.foodpanda.ro/restaurant/v5gi/azima',
+        # 'https://www.foodpanda.ro/restaurant/v1js/hopaa',
+        # 'https://www.foodpanda.ro/restaurant/v4rj/pizza-transilvania',
+        # 'https://www.foodpanda.ro/restaurant/v5wn/pizza-adaggio',
+        # 'https://www.foodpanda.ro/restaurant/v4yi/big-belly-vendor',
+        # 'https://www.foodpanda.ro/restaurant/v1ok/taboo-doner',
+        # 'https://www.foodpanda.ro/chain/cj2cc/pizza-romana',
+
+        # 'https://www.foodpanda.ro/restaurant/v5ek/cedelicii-delivery',
+        # 'https://www.foodpanda.ro/restaurant/v0kk/log-out',
+        # 'https://www.foodpanda.ro/restaurant/v4pl/bonita',
+        # 'https://www.foodpanda.ro/restaurant/v7qc/pizza-napoli-cuptor-cu-lemne',
     ]
 
     def start_requests(self):

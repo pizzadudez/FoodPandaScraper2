@@ -18,7 +18,7 @@ https://www.foodpanda.ro/restaurant/v5ai/steak
   - try requests from predefined array of width
   - save locally with product id as name
 - skip vendor if crawled recently
-- combo menu items are products with options that are other menu items
+- [x] combo menu items are products with options that are other menu items
   - add vendor
   - add toppings + options (products + product options)
   - add the rest normally

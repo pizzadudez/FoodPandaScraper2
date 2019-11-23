@@ -85,6 +85,7 @@ class Product(Base):
     description = Column('description', String)
     price = Column('price', String)
     is_combo_menu_item = Column('is_combo_menu_item', Boolean, default=False)
+    code = Column('code', String)
     menu_category_id = Column(Integer, ForeignKey('menu_categories.id'))
     # Parent
     menu_category = relationship('MenuCategory', back_populates='products')

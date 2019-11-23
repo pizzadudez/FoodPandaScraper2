@@ -75,7 +75,7 @@ class PostgresPipeline(object):
                 p.options.append(o)
                 t.options.append(o)
             vendor.toppings.append(t)
-            
+
         # Menus
         menus = item.get('menus', [])
         for menu in menus:
@@ -132,6 +132,23 @@ class PostgresPipeline(object):
                         for topping_id in variation.get('topping_ids', []):
                             topping = session.query(Topping).filter_by(id=topping_id).first()
                             v.toppings.append(topping)
+
+        # Identify combo menu items
+        for topping in vendor.toppings:
+            # Check if topping selector has menu item options
+            topping_has_menu_items = False
+            for option in topping.options:
+                product = session.query(Product).filter_by(id=option.product_id).first()
+                if product.menu_category_id:
+                    topping_has_menu_items = True
+                    break
+            # Flag all products with this topping selector as combo items
+            if topping_has_menu_items :
+                for variation in topping.variations:
+                    product = variation.product
+                    product.is_combo_menu_item = True
+                    product.code = item['code']
+
 
         # Finish
         session.commit()

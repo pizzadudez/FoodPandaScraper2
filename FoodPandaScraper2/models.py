@@ -46,8 +46,8 @@ class Vendor(Base):
 
 
 menus_menu_categories = Table('menus_menu_categories', Base.metadata,
-    Column('menu.id', Integer, ForeignKey('menus.id')),
-    Column('menu_category.id', Integer, ForeignKey('menu_categories.id'))
+    Column('menu_id', Integer, ForeignKey('menus.id', ondelete='cascade')),
+    Column('menu_category_id', Integer, ForeignKey('menu_categories.id', ondelete='cascade'))
 )
 
 
@@ -84,11 +84,14 @@ class Product(Base):
     name = Column('name', String)
     description = Column('description', String)
     price = Column('price', String)
+    is_combo_menu_item = Column('is_combo_menu_item', Boolean, default=False)
     menu_category_id = Column(Integer, ForeignKey('menu_categories.id'))
     # Parent
     menu_category = relationship('MenuCategory', back_populates='products')
     # Children
     variations = relationship('Variation', back_populates='product',
+            cascade='save-update, delete')
+    options = relationship('Option', back_populates='product',
             cascade='save-update, delete')
 
 
@@ -130,9 +133,9 @@ class Topping(Base):
 class Option(Base):
     __tablename__ = 'options'
     id = Column(Integer, primary_key=True)
-    name = Column('name', String)
     price = Column('price', String)
-    product_id = Column('product_id', Integer)
+    product_id = Column(Integer, ForeignKey('products.id'))
     topping_id = Column(Integer, ForeignKey('toppings.id', ondelete='cascade'))
-    # Parent
+    # Parents
+    product = relationship('Product', back_populates='options')
     topping = relationship('Topping', back_populates='options')

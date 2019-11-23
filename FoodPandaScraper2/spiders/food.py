@@ -11,7 +11,8 @@ class FoodSpider(scrapy.Spider):
     limit = 1 # number of vendors per city allowed
     dev = False
     dev_urls = [
-        'https://www.foodpanda.ro/restaurant/v4no/pizza-hut-delivery-brasov-nord',
+        'https://www.foodpanda.ro/restaurant/v4rj/pizza-transilvania',
+        # 'https://www.foodpanda.ro/restaurant/v4no/pizza-hut-delivery-brasov-nord',
     ]
 
     def start_requests(self):

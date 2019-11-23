@@ -21,6 +21,7 @@ class PostgresPipeline(object):
     def process_item(self, item, spider):
         session = self.session()
         
+        # City
         city_id = item.get('city_id', None)
         city = session.query(City).filter_by(id=city_id).first()
         if not city:
@@ -28,34 +29,13 @@ class PostgresPipeline(object):
             session.add(city)
             session.commit()
 
-        # Toppings
-        toppings = item.get('toppings', [])
-        toppings = toppings.values() if isinstance(toppings, dict) else []
-        for topping in toppings:
-            t = session.query(Topping).filter_by(id=topping['id']).first()
-            if t:
-                session.delete(t)
-                session.commit()
-            t = Topping(
-                id=topping['id'],
-                description=topping['name'],
-                min_quantity=topping['quantity_minimum'],
-                max_quantity=topping['quantity_maximum']
-            )
-            options = topping.get('options', [])
-            for option in options:
-                o = Option(
-                    name=option['name'],
-                    price=option['price'],
-                    product_id=option['product_id']
-                )
-                t.options.append(o)
-            session.add(t)
-        session.commit()
-
         # Vendor
         vendor = session.query(Vendor).filter_by(id=item['id']).first()
         if vendor:
+            # Many to many deletes are weird
+            for menu in vendor.menus:
+                for menu_category in menu.menu_categories:
+                    session.delete(menu_category)
             session.delete(vendor)
         vendor = Vendor(
             id=item['id'],
@@ -69,6 +49,33 @@ class PostgresPipeline(object):
             city_id=city_id
         )
         session.add(vendor)
+
+        # Toppings
+        toppings = item.get('toppings', [])
+        toppings = toppings.values() if isinstance(toppings, dict) else []
+        for topping in toppings:
+            t = Topping(
+                id=topping['id'],
+                description=topping['name'],
+                min_quantity=topping['quantity_minimum'],
+                max_quantity=topping['quantity_maximum'],
+            )
+            options = topping.get('options', [])
+            for option in options:
+                p = session.query(Product).filter_by(id=option['product_id']).first()
+                if not p:
+                    description = option.get('description', None)
+                    p = Product(
+                        id=option['product_id'],
+                        name=option['name'],
+                        description=description if description else None
+                    )
+                    session.add(p)
+                o = Option(id=option['id'], price=option['price'])
+                p.options.append(o)
+                t.options.append(o)
+            vendor.toppings.append(t)
+            
         # Menus
         menus = item.get('menus', [])
         for menu in menus:
@@ -78,6 +85,7 @@ class PostgresPipeline(object):
                 opening_time=menu['opening_time'],
                 closing_time=menu['closing_time']
             )
+            vendor.menus.append(m)
             # Menu Categories
             menu_categories = menu.get('menu_categories', [])
             for category in menu_categories:
@@ -88,11 +96,12 @@ class PostgresPipeline(object):
                         name=category['name'],
                         description=category.get('description', None)
                     )
+                m.menu_categories.append(mc)
                 # Products
                 products = category.get('products', [])
                 for product in products:
-                    variations = product.get('product_variations', [])
                     p = session.query(Product).filter_by(id=product['id']).first()
+                    variations = product.get('product_variations', [])
                     if not p:
                         p = Product(
                             id=product['id'],
@@ -100,25 +109,29 @@ class PostgresPipeline(object):
                             description=product.get('description', None),
                             price=variations[0].get('price', None)
                         )
-                        # Check if Product has Variations and Toppings
-                        multiple_variations = True if len(variations) > 1 else False
-                        has_toppings = True if len(variations[0]['topping_ids']) else False
-                        if not multiple_variations and not has_toppings:
-                            continue # No variations to add
-                        # Variations
-                        for variation in variations:
-                            v = Variation(
-                                id=variation['id'],
-                                name=variation.get('name', None),
-                                price=variation.get('price', None)
-                            )
-                            for topping_id in variation.get('topping_ids', []):
-                                topping = session.query(Topping).filter_by(id=topping_id).first()
-                                v.toppings.append(topping)
-                            p.variations.append(v)
+                    elif not p.menu_category_id: 
+                        p.price = variations[0].get('price', None)
+                    else:
+                        mc.products.append(p)
+                        continue # Skip this product if it already is set as a menu item
                     mc.products.append(p)
-                m.menu_categories.append(mc)
-            vendor.menus.append(m)
+
+                    # Variations
+                    multiple_variations = True if len(variations) > 1 else False
+                    has_toppings = True if len(variations[0]['topping_ids']) else False
+                    # Check if Product has Variations and Toppings
+                    if not multiple_variations and not has_toppings:
+                        continue # No variations to add
+                    for variation in variations:
+                        v = Variation(
+                            id=variation['id'],
+                            name=variation.get('name', None),
+                            price=variation.get('price', None)
+                        )
+                        p.variations.append(v)
+                        for topping_id in variation.get('topping_ids', []):
+                            topping = session.query(Topping).filter_by(id=topping_id).first()
+                            v.toppings.append(topping)
 
         # Finish
         session.commit()

@@ -68,44 +68,57 @@ class PostgresPipeline(object):
             coordinates=str(item['latitude']) + ',' + str(item['longitude']),
             city_id=city_id
         )
-        # Menu Categories
-        menus = item.get('menus', [])
-        menu_categories = menus[0].get('menu_categories', []) if menus[0] else []
-        for category in menu_categories:
-            mc = MenuCategory(
-                id=category['id'],
-                name=category['name'],
-                description=category.get('description', None)
-            )
-            # Products
-            products = category.get('products', [])
-            for product in products:
-                variations = product.get('product_variations', [])
-                p = Product(
-                    id=product['id'],
-                    name=product['name'],
-                    description=product.get('description', None),
-                    price=variations[0].get('price', None)
-                )
-                # Check if Product has Variations and Toppings
-                multiple_variations = True if len(variations) > 1 else False
-                has_toppings = True if len(variations[0]['topping_ids']) else False
-                if not multiple_variations and not has_toppings:
-                    continue # No variations to add
-                # Variations
-                for variation in variations:
-                    v = Variation(
-                        id=variation['id'],
-                        name=variation.get('name', None),
-                        price=variation.get('price', None)
-                    )
-                    for topping_id in variation.get('topping_ids', []):
-                        topping = session.query(Topping).filter_by(id=topping_id).first()
-                        v.toppings.append(topping)
-                    p.variations.append(v)
-                mc.products.append(p)
-            vendor.menu_categories.append(mc)
         session.add(vendor)
+        # Menus
+        menus = item.get('menus', [])
+        for menu in menus:
+            m = Menu(
+                id=menu['id'],
+                name=menu['name'],
+                opening_time=menu['opening_time'],
+                closing_time=menu['closing_time']
+            )
+            # Menu Categories
+            menu_categories = menu.get('menu_categories', [])
+            for category in menu_categories:
+                mc = session.query(MenuCategory).filter_by(id=category['id']).first()
+                if not mc:
+                    mc = MenuCategory(
+                        id=category['id'],
+                        name=category['name'],
+                        description=category.get('description', None)
+                    )
+                # Products
+                products = category.get('products', [])
+                for product in products:
+                    variations = product.get('product_variations', [])
+                    p = session.query(Product).filter_by(id=product['id']).first()
+                    if not p:
+                        p = Product(
+                            id=product['id'],
+                            name=product['name'],
+                            description=product.get('description', None),
+                            price=variations[0].get('price', None)
+                        )
+                        # Check if Product has Variations and Toppings
+                        multiple_variations = True if len(variations) > 1 else False
+                        has_toppings = True if len(variations[0]['topping_ids']) else False
+                        if not multiple_variations and not has_toppings:
+                            continue # No variations to add
+                        # Variations
+                        for variation in variations:
+                            v = Variation(
+                                id=variation['id'],
+                                name=variation.get('name', None),
+                                price=variation.get('price', None)
+                            )
+                            for topping_id in variation.get('topping_ids', []):
+                                topping = session.query(Topping).filter_by(id=topping_id).first()
+                                v.toppings.append(topping)
+                            p.variations.append(v)
+                    mc.products.append(p)
+                m.menu_categories.append(mc)
+            vendor.menus.append(m)
 
         # Finish
         session.commit()

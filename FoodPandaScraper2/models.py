@@ -39,8 +39,30 @@ class Vendor(Base):
     # Parent
     city = relationship('City', back_populates='vendors')
     # Children
-    menu_categories = relationship('MenuCategory', back_populates='vendor',
+    toppings = relationship('Topping', back_populates='vendor',
             cascade='save-update, delete')
+    menus = relationship('Menu', back_populates='vendor',
+            cascade='save-update, delete')
+
+
+menus_menu_categories = Table('menus_menu_categories', Base.metadata,
+    Column('menu.id', Integer, ForeignKey('menus.id')),
+    Column('menu_category.id', Integer, ForeignKey('menu_categories.id'))
+)
+
+
+class Menu(Base):
+    __tablename__ = 'menus'
+    id = Column(Integer, primary_key=True)
+    name = Column('name', String)
+    opening_time = Column('opening_time', String)
+    closing_time = Column('closing_time', String)
+    vendor_id = Column(Integer, ForeignKey('vendors.id'))
+    # Parent
+    vendor = relationship('Vendor', back_populates='menus')
+    # Children
+    menu_categories = relationship('MenuCategory', secondary=menus_menu_categories,
+            back_populates='menus')
 
 
 class MenuCategory(Base):
@@ -48,9 +70,9 @@ class MenuCategory(Base):
     id = Column(Integer, primary_key=True)
     name = Column('name', String)
     description = Column('description', String)
-    vendor_id = Column(Integer, ForeignKey('vendors.id'))
-    # Parent
-    vendor = relationship('Vendor', back_populates='menu_categories')
+    # Parents
+    menus = relationship('Menu', secondary=menus_menu_categories,
+            back_populates='menu_categories')
     # Children
     products = relationship('Product', back_populates='menu_category',
             cascade='save-update, delete')
@@ -95,7 +117,9 @@ class Topping(Base):
     description = Column('description', String)
     min_quantity = Column('min_quantity', Integer)
     max_quantity = Column('max_quantity', Integer)
+    vendor_id = Column(Integer, ForeignKey('vendors.id'))
     # Parents
+    vendor = relationship('Vendor', back_populates='toppings')
     variations = relationship('Variation', secondary=variations_toppings,
             back_populates='toppings')
     # Children

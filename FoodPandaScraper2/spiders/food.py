@@ -8,7 +8,7 @@ class FoodSpider(scrapy.Spider):
     name = 'food'
     allowed_domains = ['foodpanda.ro']
     start_urls = ['https://www.foodpanda.ro']
-    limit = 4 # number of vendors per city allowed
+    limit = 1 # number of vendors per city allowed
     dev = False
     dev_urls = [
         'https://www.foodpanda.ro/restaurant/v4no/pizza-hut-delivery-brasov-nord',

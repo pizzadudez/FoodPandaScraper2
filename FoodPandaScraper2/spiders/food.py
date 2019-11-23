@@ -82,4 +82,6 @@ class FoodSpider(scrapy.Spider):
         vendor_data = json.loads(menu.get('data-vendor', {}))
         vendor_data['url'] = response.url
         vendor_data['city_name'] = response.meta.get('city_name', None)
+        vendor_data['address'] = soup.select_one('p.vendor-location').text.strip()
+        
         yield vendor_data

@@ -31,10 +31,10 @@ class Vendor(Base):
     updated_at = Column('updated_at', DateTime)
     name = Column('name', String)
     url = Column('url', String)
-    image = Column('image', String)
     rating = Column('rating', String)
     address = Column('address', String)
-    coordinates = Column('coordinates', String)
+    latitude = Column('latitude', String)
+    longitude = Column('longitude', String)
     city_id = Column(Integer, ForeignKey('scrapy_cities.id'))
     # Parent
     city = relationship('City', back_populates='vendors')

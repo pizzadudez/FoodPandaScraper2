@@ -48,10 +48,10 @@ class PostgresPipeline(object):
             updated_at=datetime.datetime.now(),
             name=item['name'],
             url=item['url'],
-            image=None,
             rating=item.get('rating', None),
-            address=None,
-            coordinates=str(item['latitude']) + ',' + str(item['longitude']),
+            address=item['address'],
+            latitude=item['latitude'],
+            longitude=item['longitude'],
             city_id=city_id
         )
         session.add(vendor)

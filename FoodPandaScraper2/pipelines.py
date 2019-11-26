@@ -124,7 +124,10 @@ class PostgresPipeline(object):
                     # Append product_id for the image download pipeline
                     if product.get('file_path', None):
                         p.has_image = True
-                        item['images'].append(product['id'])
+                        item['images'].append({
+                            'url': product['file_path'],
+                            'id': product['id']
+                        })
                     mc.products.append(p)
 
                     # Variations
@@ -170,9 +173,8 @@ class CustomImagesPipeline(ImagesPipeline):
     CONVERTED_ORIGINAL = re.compile('^full/[0-9,a-f]+.jpg$')
 
     def get_media_requests(self, item, info):
-        url = "https://images.deliveryhero.io/image/fd-ro/Products/"
-        end = '.jpg?width=3000'
-        return [Request(url + str(x) + end, meta={'id': x})
+        width = 5000
+        return [Request(x['url'] % width, meta={'id': x['id']})
                 for x in item.get('images', [])]
         
     def get_images(self, response, request, info):

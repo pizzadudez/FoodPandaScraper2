@@ -24,12 +24,22 @@ https://www.foodpanda.ro/restaurant/v5ai/steak
   - add the rest normally
   - go thru all products that have a menu_cat.id and check for combos
     - use .join() in sqlalchemy to get all menu_item_products of a vendor
-- [ ] images retry with different widths
+- [x] images retry with different widths
   - try requests from predefined array of width
+  - Solved: added download delay => all images @ 5000px
 - [ ] add remaining vendor data
+  - vendor banner
+- [ ] images table (one products many images) -> figure out after s3 integration
 
+
+```
+https://images.deliveryhero.io/image/fd-ro/Products/60253.png?width=5000
+https://images.deliveryhero.io/image/fd-ro/Products/60253.jpg?width=5000
+```
 
 ## Issues:
 - city name issue with restaurant in Arad that's actually in Cluj;
   - seems to be fixed for now on foodpanda's end but need a more reliable solution
   - ? ignore vendor-data.city_id and generate our own id's for each city url
+- Handling chains (crawling vendors doesn't redirect)
+

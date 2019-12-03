@@ -2,13 +2,12 @@ from sqlalchemy import create_engine, Column, Table
 from sqlalchemy import Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.engine.url import URL
 
-from FoodPandaScraper2.settings import DATABASE
+from FoodPandaScraper2.settings import CONNECTION_STRING
 
 
 def db_connect():
-    return create_engine(URL(**DATABASE))
+    return create_engine(CONNECTION_STRING)
 
 def create_tables(engine):
     Base.metadata.create_all(engine)
@@ -19,7 +18,7 @@ Base = declarative_base()
 class City(Base):
     __tablename__ = 'scrapy_cities'
     id = Column(Integer, primary_key=True)
-    name = Column('name', String)
+    name = Column('name', String(64))
     # Children
     vendors = relationship('Vendor', back_populates='city',
             cascade='save-update, delete')
@@ -29,12 +28,12 @@ class Vendor(Base):
     __tablename__ = 'scrapy_vendors'
     id = Column(Integer, primary_key=True)
     updated_at = Column('updated_at', DateTime)
-    name = Column('name', String)
-    url = Column('url', String)
-    rating = Column('rating', String)
-    address = Column('address', String)
-    latitude = Column('latitude', String)
-    longitude = Column('longitude', String)
+    name = Column('name', String(64))
+    url = Column('url', String(128))
+    rating = Column('rating', String(4))
+    address = Column('address', String(64))
+    latitude = Column('latitude', String(64))
+    longitude = Column('longitude', String(64))
     city_id = Column(Integer, ForeignKey('scrapy_cities.id'))
     # Parent
     city = relationship('City', back_populates='vendors')
@@ -56,9 +55,9 @@ menus_menu_categories = Table('scrapy_menus_menu_categories', Base.metadata,
 class Menu(Base):
     __tablename__ = 'scrapy_menus'
     id = Column(Integer, primary_key=True)
-    name = Column('name', String)
-    opening_time = Column('opening_time', String)
-    closing_time = Column('closing_time', String)
+    name = Column('name', String(64))
+    opening_time = Column('opening_time', String(64))
+    closing_time = Column('closing_time', String(64))
     vendor_id = Column(Integer, ForeignKey('scrapy_vendors.id'))
     # Parent
     vendor = relationship('Vendor', back_populates='menus')
@@ -70,8 +69,8 @@ class Menu(Base):
 class MenuCategory(Base):
     __tablename__ = 'scrapy_menu_categories'
     id = Column(Integer, primary_key=True)
-    name = Column('name', String)
-    description = Column('description', String)
+    name = Column('name', String(64))
+    description = Column('description', String(128))
     # Parents
     menus = relationship('Menu', secondary=menus_menu_categories,
             back_populates='menu_categories')
@@ -83,12 +82,12 @@ class MenuCategory(Base):
 class Product(Base):
     __tablename__ = 'scrapy_products'
     id = Column(Integer, primary_key=True)
-    name = Column('name', String)
-    description = Column('description', String)
-    price = Column('price', String)
+    name = Column('name', String(64))
+    description = Column('description', String(255))
+    price = Column('price', String(64))
     has_image = Column('has_image', Boolean, default=False)
     is_combo_menu_item = Column('is_combo_menu_item', Boolean, default=False)
-    # code = Column('code', String)
+    # code = Column('code', String(64))
     menu_category_id = Column(Integer, ForeignKey('scrapy_menu_categories.id'))
     # Parent
     menu_category = relationship('MenuCategory', back_populates='products')
@@ -108,8 +107,8 @@ variations_toppings = Table('scrapy_variations_toppings', Base.metadata,
 class Variation(Base):
     __tablename__ = 'scrapy_variations'
     id = Column(Integer, primary_key=True)
-    name = Column('name', String)
-    price = Column('price', String)
+    name = Column('name', String(64))
+    price = Column('price', String(64))
     product_id = Column(Integer, ForeignKey('scrapy_products.id'))
     # Parent
     product = relationship('Product', back_populates='variations')
@@ -121,7 +120,7 @@ class Variation(Base):
 class Topping(Base):
     __tablename__ = 'scrapy_toppings'
     id = Column(Integer, primary_key=True)
-    description = Column('description', String)
+    description = Column('description', String(255))
     min_quantity = Column('min_quantity', Integer)
     max_quantity = Column('max_quantity', Integer)
     vendor_id = Column(Integer, ForeignKey('scrapy_vendors.id'))
@@ -137,7 +136,7 @@ class Topping(Base):
 class Option(Base):
     __tablename__ = 'scrapy_options'
     id = Column(Integer, primary_key=True)
-    price = Column('price', String)
+    price = Column('price', String(64))
     product_id = Column(Integer, ForeignKey('scrapy_products.id'))
     topping_id = Column(Integer, ForeignKey('scrapy_toppings.id', ondelete='cascade'))
     # Parents

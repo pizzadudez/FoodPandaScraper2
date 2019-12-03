@@ -1,21 +1,19 @@
 import json
 import scrapy
+import datetime
 
 from bs4 import BeautifulSoup as bs
 from scrapy.http import Request
 from sqlalchemy.orm import sessionmaker, query
 
-from FoodPandaScraper2.models import db_connect, create_tables, Vendor
-
-engine = db_connect()
-create_tables(engine)
+from FoodPandaScraper2.models import db_connect, Vendor
+from FoodPandaScraper2.settings import VENDOR_UPDATE_DELTA, VENDOR_COUNT_LIMIT
 
 
 class FoodSpider(scrapy.Spider):
     name = 'food'
     allowed_domains = ['foodpanda.ro']
     start_urls = ['https://www.foodpanda.ro']
-    limit = 2 # number of vendors per city allowed
     dev = False
     dev_urls = [
         # 'https://www.foodpanda.ro/chain/ca1vt/french-bakery',
@@ -34,11 +32,18 @@ class FoodSpider(scrapy.Spider):
         # 'https://www.foodpanda.ro/restaurant/v4pl/bonita',
         # 'https://www.foodpanda.ro/restaurant/v7qc/pizza-napoli-cuptor-cu-lemne',
     ]
+    engine = db_connect()
     session = sessionmaker(bind=engine)
 
     def start_requests(self):
         if self.dev:
+            session = self.session()
             for url in self.dev_urls:
+                current_time = datetime.datetime.now()
+                vendor = session.query(Vendor).filter_by(url=url).filter(
+                        Vendor.updated_at > current_time - VENDOR_UPDATE_DELTA).first()
+                if vendor:
+                    continue
                 yield Request(url=url, callback=self.parse_vendor)
             return
 
@@ -66,13 +71,16 @@ class FoodSpider(scrapy.Spider):
 
         count = 0
         for url in urls:
-            # skip vendor if already scraped
-            vendor = session.query(Vendor).filter_by(url=url).first()
+            # skip vendor if already scraped and it's not yet time to update
+            current_time = datetime.datetime.now()
+            vendor = session.query(Vendor).filter_by(url=url).filter(
+                    Vendor.updated_at > current_time - VENDOR_UPDATE_DELTA).first()
             if vendor:
                 continue
-            # stop crawling if city limit exists
+
+            # stop crawling if vendor limit exists
             count = count + 1
-            if self.limit and count > self.limit:
+            if VENDOR_COUNT_LIMIT > 0 and count > VENDOR_COUNT_LIMIT:
                 break
 
             meta = {'city_name': city_name}

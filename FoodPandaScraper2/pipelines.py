@@ -15,9 +15,10 @@ from scrapy.http import Request
 from sqlalchemy.orm import sessionmaker, query
 
 from FoodPandaScraper2.models import *
+from FoodPandaScraper2.settings import PRODUCT_IMAGE_WIDTH
 
 
-class PostgresPipeline(object):
+class DatabasePipeline(object):
     def __init__(self):
         engine = db_connect()
         create_tables(engine)
@@ -173,7 +174,7 @@ class CustomImagesPipeline(ImagesPipeline):
     CONVERTED_ORIGINAL = re.compile('^full/[0-9,a-f]+.jpg$')
 
     def get_media_requests(self, item, info):
-        width = 5000
+        width = PRODUCT_IMAGE_WIDTH if PRODUCT_IMAGE_WIDTH <= 5000 else 5000
         return [Request(x['url'] % width, meta={'id': x['id']})
                 for x in item.get('images', [])]
         
@@ -185,7 +186,7 @@ class CustomImagesPipeline(ImagesPipeline):
             yield key, image, buf
 
     def change_filename(self, key, response):
-        return "full/%s.jpg" % response.meta['id']
+        return "products/%s.jpg" % response.meta['id']
 
 
 class JsonPipeline(object):

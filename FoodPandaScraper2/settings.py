@@ -9,19 +9,33 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+import datetime
+from FoodPandaScraper2.credentials import credentials
+
+###############################################################################
+# Custom Crawler SETTINGS 
+###############################################################################
+# Set how old vendor data must be to be updated
+VENDOR_UPDATE_DELTA = datetime.timedelta(days=7)
+# (dev) Limit how many vendors per city get crawled, 0 means no limit
+VENDOR_COUNT_LIMIT = 1
+# Max-width: 5000
+PRODUCT_IMAGE_WIDTH = 3000
+###############################################################################
+
 BOT_NAME = 'FoodPandaScraper2'
 
 SPIDER_MODULES = ['FoodPandaScraper2.spiders']
 NEWSPIDER_MODULE = 'FoodPandaScraper2.spiders'
 
-DATABASE = {
-    'drivername': 'postgres',
-    'host': 'localhost',
-    'port': '5432',
-    'username': 'postgres',
-    'password': 'foodpanda',
-    'database': 'scrape',
-}
+# Database Connection String
+CONNECTION_STRING = 'mysql+pymysql://{username}:{password}@{host}/{database}'.format(
+    driver = credentials.get('DB_DRIVER', None),
+    host = credentials.get('DB_HOST', None),
+    username = credentials.get('DB_USERNAME', None),
+    password = credentials.get('DB_PASSWORD', None),
+    database = credentials.get('DB_NAME', None),
+)
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'FoodPandaScraper2 (+http://www.yourdomain.com)'
@@ -73,11 +87,17 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 5
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'FoodPandaScraper2.pipelines.PostgresPipeline': 100,
-   'FoodPandaScraper2.pipelines.JsonPipeline': 200,
+   'FoodPandaScraper2.pipelines.DatabasePipeline': 100,
    'FoodPandaScraper2.pipelines.CustomImagesPipeline': 300,
+#    'FoodPandaScraper2.pipelines.JsonPipeline': 200,
 }
 
+# Image store S3
+# AWS_ACCESS_KEY_ID = credentials.get('AWS_ACCESS_KEY_ID', None)
+# AWS_SECRET_ACCESS_KEY = credentials.get('AWS_SECRET_ACCESS_KEY', None)
+# IMAGES_STORE = credentials.get('AWS_BUCKET_URI', None)
+
+# Image store local
 IMAGES_STORE = 'FoodPandaScraper2/images'
 
 # Enable and configure the AutoThrottle extension (disabled by default)

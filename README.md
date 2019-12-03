@@ -1,12 +1,6 @@
-# New concept:
-- yield json
-- db insert in pipeline
-
-
-??? multiple menus (cu orar diferit)
-https://www.foodpanda.ro/restaurant/v5ai/steak
-
-
+## Setup:
+- `credentials.py` based on `credentials_sample.py`
+- `scrapy crawl food`
 
 ## TODO:
 - [x] add menu model
@@ -30,16 +24,15 @@ https://www.foodpanda.ro/restaurant/v5ai/steak
 - [ ] add remaining vendor data
   - vendor banner
 - [ ] images table (one products many images) -> figure out after s3 integration
+- [x] requirements.txt
+- [x] sepparate credentials file
+- [x] skip vendor if recently crawled
+- [ ] vendor updated_at UTC timezone info
 
 
-```
-https://images.deliveryhero.io/image/fd-ro/Products/60253.png?width=5000
-https://images.deliveryhero.io/image/fd-ro/Products/60253.jpg?width=5000
-```
-
-## Issues:
+## Potential Issues:
 - city name issue with restaurant in Arad that's actually in Cluj;
   - seems to be fixed for now on foodpanda's end but need a more reliable solution
   - ? ignore vendor-data.city_id and generate our own id's for each city url
-- Handling chains (crawling vendors doesn't redirect)
+- Handling chains (crawling chains doesn't redirect to local vendor)
 

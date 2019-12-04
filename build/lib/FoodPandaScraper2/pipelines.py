@@ -175,8 +175,7 @@ class CustomImagesPipeline(ImagesPipeline):
 
     def get_media_requests(self, item, info):
         width = PRODUCT_IMAGE_WIDTH if PRODUCT_IMAGE_WIDTH <= 5000 else 5000
-        vendor_id = item.get('id', 0000)
-        return [Request(x['url'] % width, meta={'id': x['id'], 'vendor_id': vendor_id})
+        return [Request(x['url'] % width, meta={'id': x['id']})
                 for x in item.get('images', [])]
         
     def get_images(self, response, request, info):
@@ -187,8 +186,7 @@ class CustomImagesPipeline(ImagesPipeline):
             yield key, image, buf
 
     def change_filename(self, key, response):
-        ids = (response.meta['vendor_id'], response.meta['id'])
-        return "places/%s/products/%s.jpg" % ids
+        return "products/%s.jpg" % response.meta['id']
 
 
 class JsonPipeline(object):

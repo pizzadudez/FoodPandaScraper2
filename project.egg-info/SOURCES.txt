@@ -1,0 +1,17 @@
+README.md
+setup.py
+FoodPandaScraper2/__init__.py
+FoodPandaScraper2/credentials.py
+FoodPandaScraper2/credentials_sample.py
+FoodPandaScraper2/items.py
+FoodPandaScraper2/middlewares.py
+FoodPandaScraper2/models.py
+FoodPandaScraper2/pipelines.py
+FoodPandaScraper2/settings.py
+FoodPandaScraper2/spiders/__init__.py
+FoodPandaScraper2/spiders/food.py
+project.egg-info/PKG-INFO
+project.egg-info/SOURCES.txt
+project.egg-info/dependency_links.txt
+project.egg-info/entry_points.txt
+project.egg-info/top_level.txt

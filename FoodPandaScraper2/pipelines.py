@@ -175,8 +175,11 @@ class CustomImagesPipeline(ImagesPipeline):
 
     def get_media_requests(self, item, info):
         width = PRODUCT_IMAGE_WIDTH if PRODUCT_IMAGE_WIDTH <= 5000 else 5000
+        width_query = "?width=%s"
         vendor_id = item.get('id', 0000)
-        return [Request(x['url'] % width, meta={'id': x['id'], 'vendor_id': vendor_id})
+        return [Request(x['url'] % width if width_query in x['url'] \
+                        else x['url'] + width_query % width, \
+                meta={'id': x['id'], 'vendor_id': vendor_id}) \
                 for x in item.get('images', [])]
         
     def get_images(self, response, request, info):

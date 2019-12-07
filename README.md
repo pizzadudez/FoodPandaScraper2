@@ -28,7 +28,7 @@
 - [x] sepparate credentials file
 - [x] skip vendor if recently crawled
 - [ ] vendor updated_at UTC timezone info
-- [ ] s3 path
+- [x] s3 path
 
 
 ## Potential Issues:

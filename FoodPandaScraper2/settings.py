@@ -18,7 +18,7 @@ from FoodPandaScraper2.credentials import credentials
 # Set how old vendor data must be to be updated
 VENDOR_UPDATE_DELTA = datetime.timedelta(days=7)
 # (dev) Limit how many vendors per city get crawled, 0 means no limit
-VENDOR_COUNT_LIMIT = 1
+VENDOR_COUNT_LIMIT = 0
 # Max-width: 5000
 PRODUCT_IMAGE_WIDTH = 3000
 ###############################################################################
